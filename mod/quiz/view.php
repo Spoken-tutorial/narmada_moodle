@@ -187,45 +187,105 @@ if ($quiz->attempts != 1) {
 
 // Determine wheter a start attempt button should be displayed.
 $viewobj->quizhasquestions = $quizobj->has_questions();
-$viewobj->preventmessages = array();
-if (!$viewobj->quizhasquestions) {
-    $viewobj->buttontext = '';
 
-} else {
-    if ($unfinished) {
-        if ($canattempt) {
-            $viewobj->buttontext = get_string('continueattemptquiz', 'quiz');
-        } else if ($canpreview) {
-            $viewobj->buttontext = get_string('continuepreview', 'quiz');
+
+
+
+
+/* Custom code start */
+#spoken db connection
+global $USER;
+include('spoken-config.php');
+
+/* Update status to 2 once user finish the test */
+if(!empty($viewobj->attempts)) {
+    foreach($viewobj->attempts as $a){
+
+        if ('finished' === $a->state) {
+
+            $sql = "select mdlcourse_id, mdlquiz_id, mdlattempt_id from training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and mdlattempt_id=".$a->id." and part_status = 1";
+
+            $result = $mysqli->query($sql);
+            $count = $result->num_rows;
+
+            if ($count) {
+                $sql = "update training_eventteststatus set part_status = 2 where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and mdlattempt_id=".$a->id." and part_status = 1";
+                $result = $mysqli->query($sql);
+            }
         }
+    }
+}
+$count = 0;
+
+/**
+* When the user try to attempt the quiz very first time
+*/
+
+if(empty($viewobj->attempts)){
+
+    $sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and part_status = 0";
+    $result = $mysqli->query($sql);
+    $count = $result->num_rows;
+
+/**
+* When the user try to do re-attempt
+*/
+
+}else{
+    foreach($viewobj->attempts as $a){
+        $sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id=".$a->quiz." and mdlattempt_id=".$a->id." and part_status <= 2";
+
+        $result = $mysqli->query($sql);
+        $count = $result->num_rows;
+    }
+}
+
+if($count){
+    /* original data  start */
+
+    $viewobj->preventmessages = array();
+    if (!$viewobj->quizhasquestions) {
+        $viewobj->buttontext = '';
 
     } else {
-        if ($canattempt) {
-            $viewobj->preventmessages = $viewobj->accessmanager->prevent_new_attempt(
-                    $viewobj->numattempts, $viewobj->lastfinishedattempt);
-            if ($viewobj->preventmessages) {
-                $viewobj->buttontext = '';
-            } else if ($viewobj->numattempts == 0) {
-                $viewobj->buttontext = get_string('attemptquiznow', 'quiz');
-            } else {
-                $viewobj->buttontext = get_string('reattemptquiz', 'quiz');
+        if ($unfinished) {
+            if ($canattempt) {
+                $viewobj->buttontext = get_string('continueattemptquiz', 'quiz');
+            } else if ($canpreview) {
+                $viewobj->buttontext = get_string('continuepreview', 'quiz');
             }
 
-        } else if ($canpreview) {
-            $viewobj->buttontext = get_string('previewquiznow', 'quiz');
-        }
-    }
+        } else {
+            if ($canattempt) {
+                $viewobj->preventmessages = $viewobj->accessmanager->prevent_new_attempt(
+                        $viewobj->numattempts, $viewobj->lastfinishedattempt);
+                if ($viewobj->preventmessages) {
+                    $viewobj->buttontext = '';
+                } else if ($viewobj->numattempts == 0) {
+                    $viewobj->buttontext = get_string('attemptquiznow', 'quiz');
+                } else {
+                    $viewobj->buttontext = get_string('reattemptquiz', 'quiz');
+                }
 
-    // If, so far, we think a button should be printed, so check if they will be
-    // allowed to access it.
-    if ($viewobj->buttontext) {
-        if (!$viewobj->moreattempts) {
-            $viewobj->buttontext = '';
-        } else if ($canattempt
-                && $viewobj->preventmessages = $viewobj->accessmanager->prevent_access()) {
-            $viewobj->buttontext = '';
+            } else if ($canpreview) {
+                $viewobj->buttontext = get_string('previewquiznow', 'quiz');
+            }
+        }
+
+        // If, so far, we think a button should be printed, so check if they will be
+        // allowed to access it.
+        if ($viewobj->buttontext) {
+            if (!$viewobj->moreattempts) {
+                $viewobj->buttontext = '';
+            } else if ($canattempt
+                    && $viewobj->preventmessages = $viewobj->accessmanager->prevent_access()) {
+                $viewobj->buttontext = '';
+            }
         }
     }
+    /* original data  end */
+} else{
+    $viewobj->preventmessages = array("Your training attendance is not marked.");
 }
 
 $viewobj->showbacktocourse = ($viewobj->buttontext === '' &&
@@ -245,3 +305,4 @@ if (isguestuser()) {
 }
 
 echo $OUTPUT->footer();
+

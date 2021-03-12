@@ -110,5 +110,18 @@ if ($currentattemptid) {
 
 $attempt = quiz_prepare_and_start_new_attempt($quizobj, $attemptnumber, $lastattempt);
 
+/* Custom code start */
+/**
+* When the user startattempt the quiz updating the it's status from 0 => 1
+*/
+
+global $USER;
+include('spoken-config.php');
+
+$sql = "update training_eventteststatus set part_status = 1, mdlattempt_id = ".$attempt->id." where mdlemail = '".$USER->email."' and part_status = 0 and mdlcourse_id = ".$cm->course." and mdlquiz_id = ".$attempt->quiz;
+
+$result = $mysqli->query($sql);
+/* Custom code start */
+
 // Redirect to the attempt page.
 redirect($quizobj->attempt_url($attempt->id, $page));
