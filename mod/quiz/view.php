@@ -221,22 +221,29 @@ $count = 0;
 * When the user try to attempt the quiz very first time
 */
 
-if(empty($viewobj->attempts)){
-
-    $sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and part_status = 0";
-    $result = $mysqli->query($sql);
-    $count = $result->num_rows;
+$sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and part_status = 0";
+$result = $mysqli->query($sql);
+$count = $result->num_rows;
 
 /**
 * When the user try to do re-attempt
 */
 
-}else{
+if(!empty($viewobj->attempts)){
     foreach($viewobj->attempts as $a){
-        $sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id=".$a->quiz." and mdlattempt_id=".$a->id." and part_status <= 2";
+        // When re attempt with Continue the last attempt
+        if ('inprogress' === $a->state) {
+            $count = 1;
+            break;
+        }
+        // When re attempt begins
+        if ('finished' !== $a->state) {
+            $sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id=".$a->quiz." and mdlattempt_id=".$a->id." and part_status <= 2";
 
-        $result = $mysqli->query($sql);
-        $count = $result->num_rows;
+            $result = $mysqli->query($sql);
+            $count = $result->num_rows;
+            break;
+        }
     }
 }
 
