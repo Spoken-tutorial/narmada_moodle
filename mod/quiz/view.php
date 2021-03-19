@@ -209,7 +209,7 @@ if(!empty($viewobj->attempts)) {
             $count = $result->num_rows;
 
             if ($count) {
-                $sql = "update training_eventteststatus set part_status = 2 where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and mdlattempt_id=".$a->id." and part_status = 1";
+                $sql = "update training_eventteststatus set part_status = 2, mdlgrade= ".$viewobj->mygrade." where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and mdlattempt_id=".$a->id." and part_status = 1";
                 $result = $mysqli->query($sql);
             }
         }
