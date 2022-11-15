@@ -118,7 +118,7 @@ $attempt = quiz_prepare_and_start_new_attempt($quizobj, $attemptnumber, $lastatt
 global $USER;
 include('spoken-config.php');
 
-$sql = "update training_eventteststatus set part_status = 1, mdlattempt_id = ".$attempt->id." where mdlemail = '".$USER->email."' and part_status = 0 and mdlcourse_id = ".$cm->course." and mdlquiz_id = ".$attempt->quiz;
+$sql = "update csc_csctestatttendance set status = 2, mdlattempt_id = ".$attempt->id." where mdluser_id = '".$USER->id."' and status = 1 and mdlcourse_id = ".$cm->course." and mdlquiz_id = ".$attempt->quiz;
 
 $result = $mysqli->query($sql);
 /* Custom code start */

@@ -203,13 +203,13 @@ if(!empty($viewobj->attempts)) {
 
         if ('finished' === $a->state) {
 
-            $sql = "select mdlcourse_id, mdlquiz_id, mdlattempt_id from training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and mdlattempt_id=".$a->id." and part_status = 1";
+            $sql = "select mdlcourse_id, mdlquiz_id, mdlattempt_id from csc_csctestatttendance where mdluser_id = '".$USER->id."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and mdlattempt_id=".$a->id." and status = 2";
 
             $result = $mysqli->query($sql);
             $count = $result->num_rows;
 
             if ($count) {
-                $sql = "update training_eventteststatus set part_status = 2, mdlgrade= ".$viewobj->mygrade." where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and mdlattempt_id=".$a->id." and part_status = 1";
+                $sql = "update csc_csctestatttendance set status = 3, mdlgrade= ".$viewobj->mygrade." where mdluser_id = '".$USER->id."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and mdlattempt_id=".$a->id." and status = 2";
                 $result = $mysqli->query($sql);
             }
         }
@@ -221,7 +221,7 @@ $count = 0;
 * When the user try to attempt the quiz very first time
 */
 
-$sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and part_status = 0";
+$sql = "select id from  csc_csctestatttendance where mdluser_id = '".$USER->id."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id = ".$quiz->id." and status = 1";
 $result = $mysqli->query($sql);
 $count = $result->num_rows;
 
@@ -238,7 +238,7 @@ if(!empty($viewobj->attempts)){
         }
         // When re attempt begins
         if ('finished' !== $a->state) {
-            $sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id=".$a->quiz." and mdlattempt_id=".$a->id." and part_status <= 2";
+            $sql = "select id from  csc_csctestatttendance where mdluser_id = '".$USER->email."' and mdlcourse_id = ".$quiz->course." and mdlquiz_id=".$a->quiz." and mdlattempt_id=".$a->id." and status <= 3";
 
             $result = $mysqli->query($sql);
             $count = $result->num_rows;
@@ -292,7 +292,7 @@ if($count){
     }
     /* original data  end */
 } else{
-    $viewobj->preventmessages = array("Your training attendance is not marked.");
+    $viewobj->preventmessages = array("Your test attendance is not marked.");
 }
 
 $viewobj->showbacktocourse = ($viewobj->buttontext === '' &&

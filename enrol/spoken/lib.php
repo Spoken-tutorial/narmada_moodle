@@ -226,7 +226,7 @@ class enrol_spoken_plugin extends enrol_plugin {
 
         // write spoken queries
         require_once($CFG->dirroot.'/mod/quiz/spoken-config.php');
-        $sql = "select id from  training_eventteststatus where mdlemail = '".$USER->email."' and mdlcourse_id = ".$instance->courseid." and part_status >= 0";
+        $sql = "select id from  csc_csctestatttendance where mdluser_id = '".$USER->id."' and mdlcourse_id = ".$instance->courseid." and status >= 0";
         $result = $mysqli->query($sql);
         $count = $result->num_rows;
         if ($count) {
